@@ -5,3 +5,5 @@ python-multipart
 qrcode
 pillow
 email-validator
+passlib[bcrypt]
+bcrypt
