@@ -1,48 +1,39 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
 function VisitorForm() {
 
   const navigate = useNavigate();
 
-  const [employees, setEmployees] =
-    useState([]);
+  const [employees, setEmployees] = useState([]);
 
-  const [loading, setLoading] =
-    useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const [availabilityMessage,
-    setAvailabilityMessage] =
+  const [availabilityMessage, setAvailabilityMessage] =
     useState("");
 
-  const [formData, setFormData] =
-    useState({
+  const [formData, setFormData] = useState({
 
-      visitor_name: "",
-      visitor_email: "",
-      visitor_phone: "",
+    visitor_name: "",
+    visitor_email: "",
+    visitor_phone: "",
 
-      employee_name: "",
-      department: "",
-      room_no: "",
+    employee_name: "",
+    department: "",
+    room_no: "",
 
-      employee_email: "",
-      employee_phone: "",
+    employee_email: "",
+    employee_phone: "",
 
-      purpose: "",
+    purpose: "",
 
-      visit_date: "",
-      visit_time: "",
+    visit_date: "",
+    visit_time: "",
 
-      location:
-        "Smart Visitor Corporate Office",
-    });
+    location: "Smart Visitor Corporate Office",
+  });
 
-  useEffect(() => {
-
-    fetchEmployees();
-
-  }, []);
+  // FETCH EMPLOYEES
 
   const fetchEmployees = async () => {
 
@@ -52,8 +43,7 @@ function VisitorForm() {
         "https://smart-visitor-management.onrender.com/employees"
       );
 
-      const data =
-        await response.json();
+      const data = await response.json();
 
       setEmployees(data);
 
@@ -63,99 +53,91 @@ function VisitorForm() {
     }
   };
 
+  useEffect(() => {
+
+    fetchEmployees();
+
+  }, []);
+
+  // HANDLE INPUT
+
   const handleChange = (e) => {
 
     setFormData({
 
       ...formData,
 
-      [e.target.name]:
-        e.target.value,
+      [e.target.name]: e.target.value,
     });
   };
 
-  const handleEmployeeSelect =
-    (e) => {
+  // EMPLOYEE SELECT
 
-      const employeeName =
-        e.target.value;
+  const handleEmployeeSelect = (e) => {
 
-      const employee =
-        employees.find(
-          (emp) =>
-            emp.name === employeeName
+    const employeeName = e.target.value;
+
+    const employee = employees.find(
+      (emp) => emp.name === employeeName
+    );
+
+    if (!employee) return;
+
+    setFormData({
+
+      ...formData,
+
+      employee_name: employee.name,
+
+      department: employee.department,
+
+      room_no: employee.room_no,
+
+      employee_email: employee.email,
+
+      employee_phone: employee.phone,
+    });
+  };
+
+  // CHECK AVAILABILITY
+
+  const checkAvailability = useCallback(async () => {
+
+    if (
+      !formData.employee_name ||
+      !formData.visit_date ||
+      !formData.visit_time
+    ) {
+      return;
+    }
+
+    try {
+
+      const response = await fetch(
+
+        `https://smart-visitor-management.onrender.com/check-availability?employee_name=${formData.employee_name}&visit_date=${formData.visit_date}&visit_time=${formData.visit_time}`
+
+      );
+
+      const data = await response.json();
+
+      if (data.available) {
+
+        setAvailabilityMessage(
+          "Employee Available"
         );
 
-      if (!employee) return;
+      } else {
 
-      setFormData({
-
-        ...formData,
-
-        employee_name:
-          employee.name,
-
-        department:
-          employee.department,
-
-        room_no:
-          employee.room_no,
-
-        employee_email:
-          employee.email,
-
-        employee_phone:
-          employee.phone,
-      });
-    };
-
-  // CHECK SLOT
-
-  const checkAvailability =
-    async () => {
-
-      if (
-        !formData.employee_name ||
-        !formData.visit_date ||
-        !formData.visit_time
-      ) {
-        return;
+        setAvailabilityMessage(
+          "Employee Busy At This Time"
+        );
       }
 
-      try {
+    } catch (error) {
 
-        const response =
-          await fetch(
-
-            `https://smart-visitor-management.onrender.com/check-availability?employee_name=${formData.employee_name}&visit_date=${formData.visit_date}&visit_time=${formData.visit_time}`
-
-          );
-
-        const data =
-          await response.json();
-
-        if (data.available) {
-
-          setAvailabilityMessage(
-            "Employee Available"
-          );
-
-        } else {
-
-          setAvailabilityMessage(
-            "Employee Busy At This Time"
-          );
-        }
-
-      } catch (error) {
-
-        console.log(error);
-      }
-    };
-
-  useEffect(() => {
-
-    checkAvailability();
+      console.log(error);
+    }
 
   }, [
     formData.employee_name,
@@ -163,9 +145,17 @@ function VisitorForm() {
     formData.visit_time,
   ]);
 
-  const handleSubmit = async (
-    e
-  ) => {
+  // FIXED USEEFFECT
+
+  useEffect(() => {
+
+    checkAvailability();
+
+  }, [checkAvailability]);
+
+  // SUBMIT
+
+  const handleSubmit = async (e) => {
 
     e.preventDefault();
 
@@ -181,18 +171,14 @@ function VisitorForm() {
           method: "POST",
 
           headers: {
-            "Content-Type":
-              "application/json",
+            "Content-Type": "application/json",
           },
 
-          body: JSON.stringify(
-            formData
-          ),
+          body: JSON.stringify(formData),
         }
       );
 
-      const data =
-        await response.json();
+      const data = await response.json();
 
       if (response.ok) {
 
@@ -205,8 +191,7 @@ function VisitorForm() {
       } else {
 
         alert(
-          data.detail ||
-            "Submission Failed"
+          data.detail || "Submission Failed"
         );
       }
 
@@ -228,7 +213,7 @@ function VisitorForm() {
 
       <div className="max-w-7xl mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden grid lg:grid-cols-2">
 
-        {/* LEFT */}
+        {/* LEFT SIDE */}
 
         <div className="bg-slate-900 text-white p-12">
 
@@ -266,9 +251,8 @@ function VisitorForm() {
               </p>
 
               <p>
-                • One Employee Cannot
-                Attend Multiple Visitors
-                At Same Time
+                • Employee Cannot Attend
+                Multiple Visitors At Same Time
               </p>
 
               <p>
@@ -285,7 +269,7 @@ function VisitorForm() {
 
         </div>
 
-        {/* RIGHT */}
+        {/* RIGHT SIDE */}
 
         <div className="p-12">
 
@@ -302,9 +286,7 @@ function VisitorForm() {
               type="text"
               name="visitor_name"
               placeholder="Visitor Name"
-              value={
-                formData.visitor_name
-              }
+              value={formData.visitor_name}
               onChange={handleChange}
               required
               className="w-full border p-4 rounded-xl"
@@ -314,9 +296,7 @@ function VisitorForm() {
               type="email"
               name="visitor_email"
               placeholder="Visitor Email"
-              value={
-                formData.visitor_email
-              }
+              value={formData.visitor_email}
               onChange={handleChange}
               required
               className="w-full border p-4 rounded-xl"
@@ -326,9 +306,7 @@ function VisitorForm() {
               type="text"
               name="visitor_phone"
               placeholder="Visitor Phone"
-              value={
-                formData.visitor_phone
-              }
+              value={formData.visitor_phone}
               onChange={handleChange}
               required
               className="w-full border p-4 rounded-xl"
@@ -337,9 +315,7 @@ function VisitorForm() {
             {/* EMPLOYEE */}
 
             <select
-              onChange={
-                handleEmployeeSelect
-              }
+              onChange={handleEmployeeSelect}
               required
               className="w-full border p-4 rounded-xl"
             >
@@ -348,17 +324,15 @@ function VisitorForm() {
                 Select Employee
               </option>
 
-              {employees.map(
-                (employee) => (
+              {employees.map((employee) => (
 
-                  <option
-                    key={employee._id}
-                    value={employee.name}
-                  >
-                    {employee.name}
-                  </option>
-                )
-              )}
+                <option
+                  key={employee._id}
+                  value={employee.name}
+                >
+                  {employee.name}
+                </option>
+              ))}
 
             </select>
 
@@ -366,9 +340,7 @@ function VisitorForm() {
 
             <input
               type="text"
-              value={
-                formData.department
-              }
+              value={formData.department}
               readOnly
               placeholder="Department"
               className="w-full bg-gray-100 border p-4 rounded-xl"
@@ -378,9 +350,7 @@ function VisitorForm() {
 
             <input
               type="text"
-              value={
-                formData.room_no
-              }
+              value={formData.room_no}
               readOnly
               placeholder="Room Number"
               className="w-full bg-gray-100 border p-4 rounded-xl"
@@ -403,9 +373,7 @@ function VisitorForm() {
             <input
               type="date"
               name="visit_date"
-              value={
-                formData.visit_date
-              }
+              value={formData.visit_date}
               onChange={handleChange}
               required
               className="w-full border p-4 rounded-xl"
@@ -418,9 +386,7 @@ function VisitorForm() {
               name="visit_time"
               min="09:00"
               max="18:00"
-              value={
-                formData.visit_time
-              }
+              value={formData.visit_time}
               onChange={handleChange}
               required
               className="w-full border p-4 rounded-xl"
@@ -461,9 +427,7 @@ function VisitorForm() {
 
               <button
                 type="button"
-                onClick={() =>
-                  navigate("/")
-                }
+                onClick={() => navigate("/")}
                 className="bg-gray-300 px-8 py-4 rounded-xl"
               >
                 Back
