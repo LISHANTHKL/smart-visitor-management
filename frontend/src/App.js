@@ -28,14 +28,14 @@ function App() {
           element={<VisitorForm />}
         />
 
-        {/* ADMIN */}
+        {/* ADMIN DASHBOARD */}
 
         <Route
           path="/admin-dashboard"
           element={<AdminDashboard />}
         />
 
-        {/* SECURITY */}
+        {/* SECURITY DASHBOARD */}
 
         <Route
           path="/security-dashboard"
