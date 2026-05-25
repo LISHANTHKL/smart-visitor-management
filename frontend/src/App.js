@@ -1,7 +1,7 @@
 import {
   BrowserRouter,
   Routes,
-  Route,
+  Route
 } from "react-router-dom";
 
 import Login from "./pages/Login";
@@ -20,24 +20,36 @@ function App() {
 
       <Routes>
 
+        {/* LOGIN */}
+
         <Route
           path="/"
           element={<Login />}
         />
+
+        {/* VISITOR FORM */}
 
         <Route
           path="/visitor-form"
           element={<VisitorForm />}
         />
 
+        {/* ADMIN */}
+
         <Route
           path="/admin-dashboard"
-          element={<AdminDashboard />}
+          element={
+            <AdminDashboard />
+          }
         />
+
+        {/* SECURITY */}
 
         <Route
           path="/security-dashboard"
-          element={<SecurityDashboard />}
+          element={
+            <SecurityDashboard />
+          }
         />
 
       </Routes>
