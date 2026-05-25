@@ -5,7 +5,8 @@ function Login() {
 
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState("");
+  const [email, setEmail] =
+    useState("");
 
   const [password, setPassword] =
     useState("");
@@ -13,253 +14,105 @@ function Login() {
   const [role, setRole] =
     useState("admin");
 
-  const [loading, setLoading] =
-    useState(false);
-
   const handleLogin = async () => {
 
-    setLoading(true);
+    if (
+      role === "admin" &&
+      email === "admin@gmail.com" &&
+      password === "admin123"
+    ) {
 
-    try {
+      navigate("/admin-dashboard");
 
-      const response = await fetch(
-        "https://smart-visitor-management.onrender.com/login",
-        {
-          method: "POST",
+    } else if (
+      role === "security" &&
+      email === "security@gmail.com" &&
+      password === "security123"
+    ) {
 
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
+      navigate("/security-dashboard");
 
-          body: JSON.stringify({
-            email,
-            password,
-            role,
-          }),
-        }
-      );
+    } else {
 
-      const data =
-        await response.json();
-
-      if (response.ok) {
-
-        localStorage.setItem(
-          "user",
-          JSON.stringify(data)
-        );
-
-        if (role === "admin") {
-
-          navigate("/admin-dashboard");
-
-        } else {
-
-          navigate(
-            "/security-dashboard"
-          );
-        }
-
-      } else {
-
-        alert(
-          data.detail ||
-            "Invalid Login"
-        );
-      }
-
-    } catch (error) {
-
-      console.log(error);
-
-      alert(
-        "Backend Server Error"
-      );
-
-    } finally {
-
-      setLoading(false);
+      alert("Invalid Credentials");
     }
   };
 
   return (
 
-    <div className="min-h-screen bg-gradient-to-br from-slate-800 to-slate-950 flex items-center justify-center p-6">
+    <div className="min-h-screen flex items-center justify-center bg-slate-900">
 
-      <div className="bg-white rounded-3xl overflow-hidden shadow-2xl max-w-6xl w-full grid grid-cols-1 md:grid-cols-2">
+      <div className="bg-white p-10 rounded-3xl shadow-2xl w-[500px]">
 
-        {/* LEFT */}
+        <h1 className="text-5xl font-bold mb-10 text-center">
+          Welcome Back
+        </h1>
 
-        <div className="bg-slate-900 text-white p-14 flex flex-col justify-center">
+        <div className="flex justify-center gap-10 mb-8">
 
-          <h1 className="text-6xl font-extrabold leading-tight mb-8">
-            Smart Visitor
-            <br />
-            Management
-          </h1>
-
-          <p className="text-xl text-slate-300 leading-10">
-
-            Enterprise-grade visitor
-            access management with
-            QR authentication,
-            security verification,
-            live approvals,
-            and automated tracking.
-
-          </p>
-
-          <div className="mt-10 space-y-5">
-
-            <div className="flex items-center gap-4">
-              <div className="w-4 h-4 rounded-full bg-green-400"></div>
-              <span>Secure QR Authentication</span>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <div className="w-4 h-4 rounded-full bg-blue-400"></div>
-              <span>Real-Time Visitor Tracking</span>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <div className="w-4 h-4 rounded-full bg-yellow-400"></div>
-              <span>Automated Email Notifications</span>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <div className="w-4 h-4 rounded-full bg-pink-400"></div>
-              <span>Industry-Level Security Workflow</span>
-            </div>
-
-          </div>
-
-        </div>
-
-        {/* RIGHT */}
-
-        <div className="p-14 flex flex-col justify-center">
-
-          <div className="text-center mb-10">
-
-            <div className="w-20 h-20 bg-slate-900 rounded-2xl mx-auto mb-5 flex items-center justify-center text-white text-3xl font-bold">
-              SV
-            </div>
-
-            <h2 className="text-5xl font-bold text-slate-800">
-              Welcome Back
-            </h2>
-
-            <p className="text-slate-500 mt-3">
-              Login to continue
-            </p>
-
-          </div>
-
-          {/* ROLE */}
-
-          <div className="flex justify-center gap-8 mb-8">
-
-            <label className="flex items-center gap-2">
-              <input
-                type="radio"
-                value="admin"
-                checked={role === "admin"}
-                onChange={(e) =>
-                  setRole(e.target.value)
-                }
-              />
+          <label>
+            <input
+              type="radio"
+              checked={role === "admin"}
+              onChange={() =>
+                setRole("admin")
+              }
+            />
+            <span className="ml-2">
               Admin
-            </label>
+            </span>
+          </label>
 
-            <label className="flex items-center gap-2">
-              <input
-                type="radio"
-                value="security"
-                checked={
-                  role === "security"
-                }
-                onChange={(e) =>
-                  setRole(e.target.value)
-                }
-              />
+          <label>
+            <input
+              type="radio"
+              checked={role === "security"}
+              onChange={() =>
+                setRole("security")
+              }
+            />
+            <span className="ml-2">
               Security
-            </label>
-
-          </div>
-
-          {/* EMAIL */}
-
-          <div className="mb-5">
-
-            <label className="block mb-2 font-medium">
-              Email Address
-            </label>
-
-            <input
-              type="email"
-              placeholder="Enter Email"
-              value={email}
-              onChange={(e) =>
-                setEmail(e.target.value)
-              }
-              className="w-full border border-gray-300 p-4 rounded-xl"
-            />
-
-          </div>
-
-          {/* PASSWORD */}
-
-          <div className="mb-8">
-
-            <label className="block mb-2 font-medium">
-              Password
-            </label>
-
-            <input
-              type="password"
-              placeholder="Enter Password"
-              value={password}
-              onChange={(e) =>
-                setPassword(e.target.value)
-              }
-              className="w-full border border-gray-300 p-4 rounded-xl"
-            />
-
-          </div>
-
-          {/* LOGIN */}
-
-          <button
-            onClick={handleLogin}
-            disabled={loading}
-            className="bg-slate-900 hover:bg-slate-700 text-white py-4 rounded-xl text-lg font-bold transition"
-          >
-
-            {loading
-              ? "Logging In..."
-              : "Login"}
-
-          </button>
-
-          {/* VISITOR */}
-
-          <button
-            onClick={() =>
-              navigate("/visitor-form")
-            }
-            className="mt-5 bg-green-500 hover:bg-green-600 text-white py-4 rounded-xl text-lg font-bold transition"
-          >
-            Visitor Appointment Form
-          </button>
-
-          <p className="text-center text-slate-400 text-sm mt-8">
-            Smart Visitor Management System
-            <br />
-            Enterprise Security Platform
-          </p>
+            </span>
+          </label>
 
         </div>
+
+        <input
+          type="email"
+          placeholder="Email"
+          className="w-full border p-4 rounded-xl mb-5"
+          value={email}
+          onChange={(e) =>
+            setEmail(e.target.value)
+          }
+        />
+
+        <input
+          type="password"
+          placeholder="Password"
+          className="w-full border p-4 rounded-xl mb-8"
+          value={password}
+          onChange={(e) =>
+            setPassword(e.target.value)
+          }
+        />
+
+        <button
+          onClick={handleLogin}
+          className="w-full bg-slate-900 text-white p-4 rounded-xl mb-5"
+        >
+          Login
+        </button>
+
+        <button
+          onClick={() =>
+            navigate("/visitor-form")
+          }
+          className="w-full bg-green-500 text-white p-4 rounded-xl"
+        >
+          Visitor Appointment Form
+        </button>
 
       </div>
 
