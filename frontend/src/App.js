@@ -1,15 +1,9 @@
-import {
-  BrowserRouter,
-  Routes,
-  Route
-} from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Login from "./pages/Login";
-
 import VisitorForm from "./pages/VisitorForm";
 
 import AdminDashboard from "./pages/AdminDashboard";
-
 import SecurityDashboard from "./pages/SecurityDashboard";
 
 function App() {
@@ -38,18 +32,14 @@ function App() {
 
         <Route
           path="/admin-dashboard"
-          element={
-            <AdminDashboard />
-          }
+          element={<AdminDashboard />}
         />
 
         {/* SECURITY */}
 
         <Route
           path="/security-dashboard"
-          element={
-            <SecurityDashboard />
-          }
+          element={<SecurityDashboard />}
         />
 
       </Routes>
