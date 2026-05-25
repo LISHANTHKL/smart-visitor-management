@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+pymongo
+python-multipart
+qrcode
+pillow
+email-validator
