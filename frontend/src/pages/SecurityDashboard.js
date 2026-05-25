@@ -30,7 +30,7 @@ function SecurityDashboard() {
     try {
 
       const response = await fetch(
-        "http://127.0.0.1:8000/security-logs"
+        "https://smart-visitor-management.onrender.com/security-logs"
       );
 
       const data = await response.json();
@@ -96,7 +96,7 @@ function SecurityDashboard() {
         try {
 
           const response = await fetch(
-            `http://127.0.0.1:8000/scan-qr/${decodedText}`,
+            `https://smart-visitor-management.onrender.com/scan-qr/${decodedText}`,
             {
               method: "PUT",
             }

@@ -50,7 +50,7 @@ function AdminDashboard() {
     try {
 
       const response = await fetch(
-        "http://127.0.0.1:8000/all-visitor-requests"
+        "https://smart-visitor-management.onrender.com/all-visitor-requests"
       );
 
       const data = await response.json();
@@ -72,7 +72,7 @@ function AdminDashboard() {
   ) => {
 
     await fetch(
-      `http://127.0.0.1:8000/approve-visitor/${visitorId}`,
+      `https://smart-visitor-management.onrender.com/approve-visitor/${visitorId}`,
       {
         method: "PUT",
       }
@@ -92,7 +92,7 @@ function AdminDashboard() {
   ) => {
 
     await fetch(
-      `http://127.0.0.1:8000/reject-visitor/${visitorId}`,
+      `https://smart-visitor-management.onrender.com/reject-visitor/${visitorId}`,
       {
         method: "PUT",
       }

@@ -60,7 +60,7 @@ function VisitorForm() {
     try {
 
       const response = await fetch(
-        "http://127.0.0.1:8000/employees"
+        "https://smart-visitor-management.onrender.com/employees"
       );
 
       const data =
@@ -145,7 +145,7 @@ function VisitorForm() {
 
       const response = await fetch(
 
-        "http://127.0.0.1:8000/create-visitor-request",
+        "https://smart-visitor-management.onrender.com/create-visitor-request",
 
         {
           method: "POST",
