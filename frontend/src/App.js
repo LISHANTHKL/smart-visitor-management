@@ -1,9 +1,7 @@
 import {
-
   BrowserRouter,
   Routes,
   Route,
-
 } from "react-router-dom";
 
 import Login from "./pages/Login";
@@ -22,28 +20,20 @@ function App() {
 
       <Routes>
 
-        {/* LOGIN PAGE */}
-
         <Route
           path="/"
           element={<Login />}
         />
-
-        {/* VISITOR FORM */}
 
         <Route
           path="/visitor-form"
           element={<VisitorForm />}
         />
 
-        {/* ADMIN DASHBOARD */}
-
         <Route
           path="/admin-dashboard"
           element={<AdminDashboard />}
         />
-
-        {/* SECURITY DASHBOARD */}
 
         <Route
           path="/security-dashboard"

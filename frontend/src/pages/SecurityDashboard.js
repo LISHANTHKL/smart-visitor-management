@@ -1,29 +1,47 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState }
+from "react";
 
-import { Html5QrcodeScanner } from "html5-qrcode";
+import {
+  Html5QrcodeScanner
+} from "html5-qrcode";
 
-import Sidebar from "../components/Sidebar";
+import { useNavigate }
+from "react-router-dom";
 
 function SecurityDashboard() {
 
-  const [scanStatus, setScanStatus] =
-    useState("Waiting for QR Scan...");
+  const navigate = useNavigate();
 
-  const [history, setHistory] =
+  const [scanStatus,
+    setScanStatus] =
+    useState(
+      "Waiting For QR Scan..."
+    );
+
+  const [history,
+    setHistory] =
     useState([]);
 
-  const [scannerRunning, setScannerRunning] =
+  const [scannerRunning,
+    setScannerRunning] =
     useState(false);
 
-  const scannerRef = useRef(null);
+  const [darkMode,
+    setDarkMode] =
+    useState(false);
 
-  const lastScannedRef = useRef("");
+  const scannerRef =
+    useRef(null);
 
-  const scanLockRef = useRef(false);
+  const lastScannedRef =
+    useRef("");
 
-  // ====================================
+  const scanLockRef =
+    useRef(false);
+
+  // ======================================
   // FETCH HISTORY
-  // ====================================
+  // ======================================
 
   const fetchHistory = async () => {
 
@@ -33,7 +51,8 @@ function SecurityDashboard() {
         "https://smart-visitor-management.onrender.com/security-logs"
       );
 
-      const data = await response.json();
+      const data =
+        await response.json();
 
       setHistory(data.reverse());
 
@@ -47,11 +66,21 @@ function SecurityDashboard() {
 
     fetchHistory();
 
+    const interval =
+      setInterval(() => {
+
+        fetchHistory();
+
+      }, 5000);
+
+    return () =>
+      clearInterval(interval);
+
   }, []);
 
-  // ====================================
+  // ======================================
   // START SCANNER
-  // ====================================
+  // ======================================
 
   const startScanner = () => {
 
@@ -59,16 +88,26 @@ function SecurityDashboard() {
 
     setScannerRunning(true);
 
+    setScanStatus(
+      "Scanner Started..."
+    );
+
     const scanner =
       new Html5QrcodeScanner(
+
         "reader",
+
         {
           fps: 10,
+
           qrbox: {
-            width: 250,
-            height: 250,
+            width: 280,
+            height: 280,
           },
+
+          aspectRatio: 1.0,
         },
+
         false
       );
 
@@ -76,36 +115,47 @@ function SecurityDashboard() {
 
       async (decodedText) => {
 
-        // BLOCK MULTIPLE SCANS
-
-        if (scanLockRef.current) return;
-
-        // BLOCK SAME QR
+        // BLOCK MULTIPLE
 
         if (
-          lastScannedRef.current === decodedText
+          scanLockRef.current
         ) {
           return;
         }
 
-        scanLockRef.current = true;
+        // BLOCK SAME QR
+
+        if (
+          lastScannedRef.current
+          === decodedText
+        ) {
+          return;
+        }
+
+        scanLockRef.current =
+          true;
 
         lastScannedRef.current =
           decodedText;
 
         try {
 
-          const response = await fetch(
-            `https://smart-visitor-management.onrender.com/scan-qr/${decodedText}`,
-            {
-              method: "PUT",
-            }
-          );
+          const response =
+            await fetch(
+
+              `https://smart-visitor-management.onrender.com/scan-qr/${decodedText}`,
+
+              {
+                method: "PUT",
+              }
+            );
 
           const data =
             await response.json();
 
-          setScanStatus(data.message);
+          setScanStatus(
+            data.message
+          );
 
           fetchHistory();
 
@@ -113,17 +163,22 @@ function SecurityDashboard() {
 
           await scanner.clear();
 
-          scannerRef.current = null;
+          scannerRef.current =
+            null;
 
-          setScannerRunning(false);
+          setScannerRunning(
+            false
+          );
 
-          // RESET AFTER 5 SECONDS
+          // RESET LOCK
 
           setTimeout(() => {
 
-            lastScannedRef.current = "";
+            scanLockRef.current =
+              false;
 
-            scanLockRef.current = false;
+            lastScannedRef.current =
+              "";
 
           }, 5000);
 
@@ -131,7 +186,8 @@ function SecurityDashboard() {
 
           console.log(error);
 
-          scanLockRef.current = false;
+          scanLockRef.current =
+            false;
         }
 
       },
@@ -141,219 +197,354 @@ function SecurityDashboard() {
       }
     );
 
-    scannerRef.current = scanner;
+    scannerRef.current =
+      scanner;
   };
 
-  // ====================================
+  // ======================================
   // STOP SCANNER
-  // ====================================
+  // ======================================
 
-  const stopScanner = async () => {
+  const stopScanner =
+    async () => {
 
-    try {
+      try {
 
-      if (scannerRef.current) {
+        if (
+          scannerRef.current
+        ) {
 
-        await scannerRef.current.clear();
+          await scannerRef.current.clear();
 
-        scannerRef.current = null;
+          scannerRef.current =
+            null;
 
-        setScannerRunning(false);
+          setScannerRunning(
+            false
+          );
+
+          setScanStatus(
+            "Scanner Stopped"
+          );
+        }
+
+      } catch (error) {
+
+        console.log(error);
       }
+    };
 
-    } catch (error) {
-
-      console.log(error);
-    }
-  };
-
-  // ====================================
+  // ======================================
   // IMAGE UPLOAD
-  // ====================================
+  // ======================================
 
-  const handleImageUpload = (
-    event
-  ) => {
+  const handleImageUpload =
+    async (event) => {
 
-    const file =
-      event.target.files[0];
+      const file =
+        event.target.files[0];
 
-    if (!file) return;
+      if (!file) return;
 
-    setScanStatus(
-      "QR Image Uploaded"
-    );
+      setScanStatus(
+        "QR Image Uploaded"
+      );
+    };
+
+  // ======================================
+  // STATUS COLORS
+  // ======================================
+
+  const getStatusColor = () => {
+
+    if (
+      scanStatus.includes(
+        "Checked-In"
+      )
+    ) {
+      return "bg-green-500";
+    }
+
+    if (
+      scanStatus.includes(
+        "Checked-Out"
+      )
+    ) {
+      return "bg-blue-500";
+    }
+
+    if (
+      scanStatus.includes(
+        "Already"
+      )
+    ) {
+      return "bg-red-500";
+    }
+
+    return "bg-yellow-500";
   };
+
+  // ======================================
+  // DASHBOARD COUNTS
+  // ======================================
+
+  const checkedInCount =
+    history.filter(
+      (log) =>
+        log.status ===
+        "checked_in"
+    ).length;
+
+  const checkedOutCount =
+    history.filter(
+      (log) =>
+        log.status ===
+        "checked_out"
+    ).length;
 
   return (
 
-    <div className="flex bg-gray-100 min-h-screen">
+    <div
+      className={
+        darkMode
+          ? "bg-slate-900 text-white min-h-screen p-8"
+          : "bg-gray-100 min-h-screen p-8"
+      }
+    >
 
-      <Sidebar />
+      {/* TOP */}
 
-      <div className="p-8 w-full">
+      <div className="flex justify-between items-center mb-10">
 
-        <h1 className="text-5xl font-bold mb-8">
+        <h1 className="text-5xl font-bold">
           Security Dashboard
         </h1>
 
-        {/* STATUS */}
+        <div className="flex gap-4">
 
-        <div
-          className={`p-5 rounded-xl text-white text-2xl font-bold mb-8 ${
-            scanStatus.includes("Checked-In")
-              ? "bg-green-500"
-              : scanStatus.includes("Checked-Out")
-              ? "bg-blue-500"
-              : scanStatus.includes("Already")
-              ? "bg-red-500"
-              : "bg-yellow-500"
-          }`}
-        >
-          {scanStatus}
-        </div>
+          <button
+            onClick={() =>
+              setDarkMode(
+                !darkMode
+              )
+            }
+            className="bg-black text-white px-5 py-3 rounded-xl"
+          >
+            Toggle Dark Mode
+          </button>
 
-        {/* QR SCANNER */}
-
-        <div className="bg-white p-8 rounded-2xl shadow mb-8">
-
-          <h2 className="text-4xl font-bold mb-5">
-            QR Scanner
-          </h2>
-
-          <div className="flex gap-5 mb-5">
-
-            <button
-              onClick={startScanner}
-              className="bg-green-500 text-white px-6 py-3 rounded-lg font-bold"
-            >
-              Start Scanning
-            </button>
-
-            <button
-              onClick={stopScanner}
-              className="bg-red-500 text-white px-6 py-3 rounded-lg font-bold"
-            >
-              Stop Scanning
-            </button>
-
-          </div>
-
-          <div className="flex justify-center">
-
-            <div
-              id="reader"
-              className="w-[400px]"
-            ></div>
-
-          </div>
+          <button
+            onClick={() =>
+              navigate("/")
+            }
+            className="bg-gray-500 text-white px-5 py-3 rounded-xl"
+          >
+            Back
+          </button>
 
         </div>
 
-        {/* IMAGE */}
+      </div>
 
-        <div className="bg-white p-8 rounded-2xl shadow mb-8">
+      {/* CARDS */}
 
-          <h2 className="text-4xl font-bold mb-5">
-            Upload QR Image
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+
+        <div className="bg-green-500 text-white p-8 rounded-2xl shadow-xl">
+
+          <h2 className="text-4xl font-bold">
+            {checkedInCount}
           </h2>
 
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImageUpload}
-            className="border p-3 rounded"
-          />
+          <p className="text-xl mt-3">
+            Checked-In
+          </p>
 
         </div>
 
-        {/* HISTORY */}
+        <div className="bg-blue-500 text-white p-8 rounded-2xl shadow-xl">
 
-        <div className="bg-white p-8 rounded-2xl shadow">
-
-          <h2 className="text-4xl font-bold mb-5">
-            Scan History
+          <h2 className="text-4xl font-bold">
+            {checkedOutCount}
           </h2>
 
-          <div className="overflow-auto max-h-[500px]">
+          <p className="text-xl mt-3">
+            Checked-Out
+          </p>
 
-            <table className="w-full border">
+        </div>
 
-              <thead className="bg-slate-800 text-white sticky top-0">
+        <div className={`${getStatusColor()} text-white p-8 rounded-2xl shadow-xl`}>
 
-                <tr>
+          <h2 className="text-2xl font-bold">
+            Scan Status
+          </h2>
 
-                  <th className="p-3">
-                    Visitor Name
-                  </th>
+          <p className="text-lg mt-4">
+            {scanStatus}
+          </p>
 
-                  <th className="p-3">
-                    Phone
-                  </th>
+        </div>
 
-                  <th className="p-3">
-                    Employee
-                  </th>
+      </div>
 
-                  <th className="p-3">
-                    Status
-                  </th>
+      {/* QR SCANNER */}
 
-                  <th className="p-3">
-                    Date
-                  </th>
+      <div className="bg-white rounded-3xl shadow-2xl p-8 mb-10">
 
-                  <th className="p-3">
-                    Time
-                  </th>
+        <h2 className="text-4xl font-bold mb-6 text-black">
+          QR Scanner
+        </h2>
+
+        <div className="flex gap-5 mb-6">
+
+          <button
+            onClick={startScanner}
+            className="bg-green-500 hover:bg-green-600 text-white px-6 py-4 rounded-xl font-bold"
+          >
+            Start Scanning
+          </button>
+
+          <button
+            onClick={stopScanner}
+            className="bg-red-500 hover:bg-red-600 text-white px-6 py-4 rounded-xl font-bold"
+          >
+            Stop Scanning
+          </button>
+
+        </div>
+
+        {/* READER */}
+
+        <div className="flex justify-center">
+
+          <div
+            id="reader"
+            className="w-[400px] border-4 border-slate-800 rounded-2xl overflow-hidden"
+          ></div>
+
+        </div>
+
+      </div>
+
+      {/* IMAGE UPLOAD */}
+
+      <div className="bg-white rounded-3xl shadow-2xl p-8 mb-10">
+
+        <h2 className="text-4xl font-bold mb-6 text-black">
+          Upload QR Image
+        </h2>
+
+        <input
+          type="file"
+          accept="image/*"
+          onChange={
+            handleImageUpload
+          }
+          className="border p-4 rounded-xl text-black"
+        />
+
+      </div>
+
+      {/* HISTORY */}
+
+      <div className="bg-white rounded-3xl shadow-2xl p-8 overflow-auto">
+
+        <h2 className="text-4xl font-bold mb-6 text-black">
+          Scan History
+        </h2>
+
+        <table className="w-full">
+
+          <thead className="bg-slate-900 text-white">
+
+            <tr>
+
+              <th className="p-4">
+                Visitor Name
+              </th>
+
+              <th className="p-4">
+                Phone
+              </th>
+
+              <th className="p-4">
+                Employee
+              </th>
+
+              <th className="p-4">
+                Status
+              </th>
+
+              <th className="p-4">
+                Date
+              </th>
+
+              <th className="p-4">
+                Time
+              </th>
+
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            {history.map(
+              (log, index) => (
+
+                <tr
+                  key={index}
+                  className="border-b text-center text-black"
+                >
+
+                  <td className="p-4">
+                    {log.visitor_name}
+                  </td>
+
+                  <td className="p-4">
+                    {log.visitor_phone}
+                  </td>
+
+                  <td className="p-4">
+                    {log.employee_name}
+                  </td>
+
+                  <td className="p-4">
+
+                    <span
+                      className={`px-4 py-2 rounded-full text-white font-semibold ${
+                        log.status ===
+                        "checked_in"
+                          ? "bg-green-500"
+                          : log.status ===
+                            "checked_out"
+                          ? "bg-blue-500"
+                          : "bg-yellow-500"
+                      }`}
+                    >
+
+                      {log.status}
+
+                    </span>
+
+                  </td>
+
+                  <td className="p-4">
+                    {log.date}
+                  </td>
+
+                  <td className="p-4">
+                    {log.time}
+                  </td>
 
                 </tr>
+              )
+            )}
 
-              </thead>
+          </tbody>
 
-              <tbody>
-
-                {history.map((log, index) => (
-
-                  <tr
-                    key={index}
-                    className="border-b text-center"
-                  >
-
-                    <td className="p-3">
-                      {log.visitor_name}
-                    </td>
-
-                    <td className="p-3">
-                      {log.visitor_phone}
-                    </td>
-
-                    <td className="p-3">
-                      {log.employee_name}
-                    </td>
-
-                    <td className="p-3">
-                      {log.status}
-                    </td>
-
-                    <td className="p-3">
-                      {log.date}
-                    </td>
-
-                    <td className="p-3">
-                      {log.time}
-                    </td>
-
-                  </tr>
-                ))}
-
-              </tbody>
-
-            </table>
-
-          </div>
-
-        </div>
+        </table>
 
       </div>
 

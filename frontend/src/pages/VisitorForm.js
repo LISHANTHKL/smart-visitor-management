@@ -1,14 +1,9 @@
 import { useEffect, useState } from "react";
-
 import { useNavigate } from "react-router-dom";
 
 function VisitorForm() {
 
   const navigate = useNavigate();
-
-  // =====================================
-  // STATES
-  // =====================================
 
   const [employees, setEmployees] =
     useState([]);
@@ -16,38 +11,32 @@ function VisitorForm() {
   const [loading, setLoading] =
     useState(false);
 
+  const [availabilityMessage,
+    setAvailabilityMessage] =
+    useState("");
+
   const [formData, setFormData] =
     useState({
 
       visitor_name: "",
-
       visitor_email: "",
-
       visitor_phone: "",
 
       employee_name: "",
-
       department: "",
-
       room_no: "",
 
       employee_email: "",
-
       employee_phone: "",
 
       purpose: "",
 
       visit_date: "",
-
       visit_time: "",
 
       location:
         "Smart Visitor Corporate Office",
     });
-
-  // =====================================
-  // FETCH EMPLOYEES
-  // =====================================
 
   useEffect(() => {
 
@@ -74,10 +63,6 @@ function VisitorForm() {
     }
   };
 
-  // =====================================
-  // HANDLE CHANGE
-  // =====================================
-
   const handleChange = (e) => {
 
     setFormData({
@@ -89,49 +74,94 @@ function VisitorForm() {
     });
   };
 
-  // =====================================
-  // EMPLOYEE SELECT
-  // =====================================
+  const handleEmployeeSelect =
+    (e) => {
 
-  const handleEmployeeSelect = (
-    e
-  ) => {
+      const employeeName =
+        e.target.value;
 
-    const employeeName =
-      e.target.value;
+      const employee =
+        employees.find(
+          (emp) =>
+            emp.name === employeeName
+        );
 
-    const employee =
-      employees.find(
-        (emp) =>
-          emp.name === employeeName
-      );
+      if (!employee) return;
 
-    if (!employee) return;
+      setFormData({
 
-    setFormData({
+        ...formData,
 
-      ...formData,
+        employee_name:
+          employee.name,
 
-      employee_name:
-        employee.name,
+        department:
+          employee.department,
 
-      department:
-        employee.department,
+        room_no:
+          employee.room_no,
 
-      room_no:
-        employee.room_no,
+        employee_email:
+          employee.email,
 
-      employee_email:
-        employee.email,
+        employee_phone:
+          employee.phone,
+      });
+    };
 
-      employee_phone:
-        employee.phone,
-    });
-  };
+  // CHECK SLOT
 
-  // =====================================
-  // SUBMIT
-  // =====================================
+  const checkAvailability =
+    async () => {
+
+      if (
+        !formData.employee_name ||
+        !formData.visit_date ||
+        !formData.visit_time
+      ) {
+        return;
+      }
+
+      try {
+
+        const response =
+          await fetch(
+
+            `https://smart-visitor-management.onrender.com/check-availability?employee_name=${formData.employee_name}&visit_date=${formData.visit_date}&visit_time=${formData.visit_time}`
+
+          );
+
+        const data =
+          await response.json();
+
+        if (data.available) {
+
+          setAvailabilityMessage(
+            "Employee Available"
+          );
+
+        } else {
+
+          setAvailabilityMessage(
+            "Employee Busy At This Time"
+          );
+        }
+
+      } catch (error) {
+
+        console.log(error);
+      }
+    };
+
+  useEffect(() => {
+
+    checkAvailability();
+
+  }, [
+    formData.employee_name,
+    formData.visit_date,
+    formData.visit_time,
+  ]);
 
   const handleSubmit = async (
     e
@@ -170,39 +200,13 @@ function VisitorForm() {
           "Visitor Request Submitted Successfully"
         );
 
-        setFormData({
-
-          visitor_name: "",
-
-          visitor_email: "",
-
-          visitor_phone: "",
-
-          employee_name: "",
-
-          department: "",
-
-          room_no: "",
-
-          employee_email: "",
-
-          employee_phone: "",
-
-          purpose: "",
-
-          visit_date: "",
-
-          visit_time: "",
-
-          location:
-            "Smart Visitor Corporate Office",
-        });
+        window.location.reload();
 
       } else {
 
         alert(
           data.detail ||
-          "Submission Failed"
+            "Submission Failed"
         );
       }
 
@@ -220,124 +224,59 @@ function VisitorForm() {
 
   return (
 
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-slate-200 to-slate-300 flex items-center justify-center p-8">
+    <div className="min-h-screen bg-gray-100 p-8">
 
-      {/* MAIN CARD */}
+      <div className="max-w-7xl mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden grid lg:grid-cols-2">
 
-      <div className="bg-white w-full max-w-7xl rounded-3xl shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-2">
+        {/* LEFT */}
 
-        {/* LEFT SECTION */}
+        <div className="bg-slate-900 text-white p-12">
 
-        <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-700 text-white p-14 flex flex-col justify-center">
+          <h1 className="text-6xl font-bold leading-tight mb-8">
+            Smart Visitor
+            <br />
+            Management
+          </h1>
 
-          <div>
+          <p className="text-xl text-slate-300 leading-9">
 
-            <h1 className="text-6xl font-extrabold leading-tight mb-6">
+            Visitor Appointment System
+            with QR Security Access.
 
-              Smart Visitor
-              <br />
-              Management
+          </p>
 
-            </h1>
+          {/* GUIDELINES */}
 
-            <p className="text-xl text-slate-300 leading-9 mb-10">
+          <div className="bg-slate-800 p-6 rounded-2xl mt-10">
 
-              Welcome to our
-              secure corporate
-              visitor appointment
-              portal.
-
-              <br />
-              <br />
-
-              Schedule meetings,
-              receive QR access,
-              and experience a
-              modern enterprise
-              visitor system.
-
-            </p>
-
-          </div>
-
-          {/* FEATURES */}
-
-          <div className="space-y-5">
-
-            <div className="flex items-center gap-4 bg-slate-800 p-4 rounded-xl">
-
-              <div className="w-4 h-4 bg-green-400 rounded-full"></div>
-
-              <span className="text-lg">
-                Secure QR Entry System
-              </span>
-
-            </div>
-
-            <div className="flex items-center gap-4 bg-slate-800 p-4 rounded-xl">
-
-              <div className="w-4 h-4 bg-blue-400 rounded-full"></div>
-
-              <span className="text-lg">
-                Real-Time Approval Workflow
-              </span>
-
-            </div>
-
-            <div className="flex items-center gap-4 bg-slate-800 p-4 rounded-xl">
-
-              <div className="w-4 h-4 bg-yellow-400 rounded-full"></div>
-
-              <span className="text-lg">
-                Automated Email Notifications
-              </span>
-
-            </div>
-
-          </div>
-
-          {/* VISITOR GUIDELINES */}
-
-          <div className="bg-slate-800 p-6 rounded-2xl mt-12">
-
-            <h3 className="text-3xl font-bold mb-5">
+            <h2 className="text-3xl font-bold mb-5">
               Visitor Guidelines
-            </h3>
+            </h2>
 
-            <div className="space-y-4 text-slate-300 text-lg leading-8">
+            <div className="space-y-4 text-lg">
 
               <p>
-                • Office timing:
-                9:00 AM to 6:00 PM
+                • Office Timing:
+                9:00 AM - 6:00 PM
               </p>
 
               <p>
-                • Meeting duration:
+                • Meeting Duration:
                 15 Minutes
               </p>
 
               <p>
-                • Employees cannot attend
-                multiple visitors at same time
+                • One Employee Cannot
+                Attend Multiple Visitors
+                At Same Time
               </p>
 
               <p>
-                • Please select available
-                meeting time slots
+                • QR Verification Required
               </p>
 
               <p>
-                • Security verification required
-              </p>
-
-              <p>
-                • QR code mandatory
-                during entry
-              </p>
-
-              <p>
-                • Visitors may need to wait
-                if employee is in another meeting
+                • Visitors May Need To Wait
               </p>
 
             </div>
@@ -346,334 +285,186 @@ function VisitorForm() {
 
         </div>
 
-        {/* RIGHT SECTION */}
+        {/* RIGHT */}
 
-        <div className="p-12 overflow-y-auto max-h-screen bg-white">
+        <div className="p-12">
 
-          <div className="mb-10">
-
-            <h2 className="text-5xl font-bold text-slate-800 mb-4">
-              Visitor Appointment
-            </h2>
-
-            <p className="text-slate-500 text-lg">
-              Fill your appointment details carefully
-            </p>
-
-          </div>
+          <h2 className="text-5xl font-bold mb-8">
+            Visitor Appointment
+          </h2>
 
           <form
             onSubmit={handleSubmit}
-            className="space-y-7"
+            className="space-y-6"
           >
 
-            {/* VISITOR NAME */}
+            <input
+              type="text"
+              name="visitor_name"
+              placeholder="Visitor Name"
+              value={
+                formData.visitor_name
+              }
+              onChange={handleChange}
+              required
+              className="w-full border p-4 rounded-xl"
+            />
 
-            <div>
+            <input
+              type="email"
+              name="visitor_email"
+              placeholder="Visitor Email"
+              value={
+                formData.visitor_email
+              }
+              onChange={handleChange}
+              required
+              className="w-full border p-4 rounded-xl"
+            />
 
-              <label className="block mb-3 font-semibold text-slate-700 text-lg">
-                Visitor Name
-              </label>
-
-              <input
-                type="text"
-                name="visitor_name"
-                value={
-                  formData.visitor_name
-                }
-                onChange={handleChange}
-                required
-                placeholder="Enter visitor name"
-                className="w-full border border-slate-300 p-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-slate-800 text-lg"
-              />
-
-            </div>
-
-            {/* EMAIL */}
-
-            <div>
-
-              <label className="block mb-3 font-semibold text-slate-700 text-lg">
-                Visitor Email
-              </label>
-
-              <input
-                type="email"
-                name="visitor_email"
-                value={
-                  formData.visitor_email
-                }
-                onChange={handleChange}
-                required
-                placeholder="Enter visitor email"
-                className="w-full border border-slate-300 p-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-slate-800 text-lg"
-              />
-
-            </div>
-
-            {/* PHONE */}
-
-            <div>
-
-              <label className="block mb-3 font-semibold text-slate-700 text-lg">
-                Visitor Phone
-              </label>
-
-              <input
-                type="text"
-                name="visitor_phone"
-                value={
-                  formData.visitor_phone
-                }
-                onChange={handleChange}
-                required
-                placeholder="Enter visitor phone"
-                className="w-full border border-slate-300 p-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-slate-800 text-lg"
-              />
-
-            </div>
+            <input
+              type="text"
+              name="visitor_phone"
+              placeholder="Visitor Phone"
+              value={
+                formData.visitor_phone
+              }
+              onChange={handleChange}
+              required
+              className="w-full border p-4 rounded-xl"
+            />
 
             {/* EMPLOYEE */}
 
-            <div>
+            <select
+              onChange={
+                handleEmployeeSelect
+              }
+              required
+              className="w-full border p-4 rounded-xl"
+            >
 
-              <label className="block mb-3 font-semibold text-slate-700 text-lg">
+              <option value="">
                 Select Employee
-              </label>
+              </option>
 
-              <select
-                onChange={
-                  handleEmployeeSelect
-                }
-                required
-                className="w-full border border-slate-300 p-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-slate-800 text-lg"
-              >
+              {employees.map(
+                (employee) => (
 
-                <option value="">
-                  Select Employee
-                </option>
+                  <option
+                    key={employee._id}
+                    value={employee.name}
+                  >
+                    {employee.name}
+                  </option>
+                )
+              )}
 
-                {employees.map(
-                  (employee) => (
+            </select>
 
-                    <option
-                      key={
-                        employee._id
-                      }
-                      value={
-                        employee.name
-                      }
-                    >
+            {/* DEPARTMENT */}
 
-                      {employee.name}
-                      {" - "}
-                      {
-                        employee.department
-                      }
+            <input
+              type="text"
+              value={
+                formData.department
+              }
+              readOnly
+              placeholder="Department"
+              className="w-full bg-gray-100 border p-4 rounded-xl"
+            />
 
-                    </option>
-                  )
-                )}
+            {/* ROOM */}
 
-              </select>
-
-            </div>
-
-            {/* GRID */}
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-              <div>
-
-                <label className="block mb-3 font-semibold text-slate-700 text-lg">
-                  Department
-                </label>
-
-                <input
-                  type="text"
-                  value={
-                    formData.department
-                  }
-                  readOnly
-                  className="w-full bg-slate-100 border p-4 rounded-2xl text-lg"
-                />
-
-              </div>
-
-              <div>
-
-                <label className="block mb-3 font-semibold text-slate-700 text-lg">
-                  Room Number
-                </label>
-
-                <input
-                  type="text"
-                  value={
-                    formData.room_no
-                  }
-                  readOnly
-                  className="w-full bg-slate-100 border p-4 rounded-2xl text-lg"
-                />
-
-              </div>
-
-            </div>
-
-            {/* CONTACT */}
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-              <div>
-
-                <label className="block mb-3 font-semibold text-slate-700 text-lg">
-                  Employee Contact
-                </label>
-
-                <input
-                  type="text"
-                  value={
-                    formData.employee_phone
-                  }
-                  readOnly
-                  className="w-full bg-slate-100 border p-4 rounded-2xl text-lg"
-                />
-
-              </div>
-
-              <div>
-
-                <label className="block mb-3 font-semibold text-slate-700 text-lg">
-                  Employee Email
-                </label>
-
-                <input
-                  type="text"
-                  value={
-                    formData.employee_email
-                  }
-                  readOnly
-                  className="w-full bg-slate-100 border p-4 rounded-2xl text-lg"
-                />
-
-              </div>
-
-            </div>
+            <input
+              type="text"
+              value={
+                formData.room_no
+              }
+              readOnly
+              placeholder="Room Number"
+              className="w-full bg-gray-100 border p-4 rounded-xl"
+            />
 
             {/* PURPOSE */}
 
-            <div>
+            <textarea
+              name="purpose"
+              placeholder="Purpose"
+              value={formData.purpose}
+              onChange={handleChange}
+              required
+              rows="4"
+              className="w-full border p-4 rounded-xl"
+            ></textarea>
 
-              <label className="block mb-3 font-semibold text-slate-700 text-lg">
-                Purpose of Visit
-              </label>
+            {/* DATE */}
 
-              <textarea
-                name="purpose"
-                value={
-                  formData.purpose
-                }
-                onChange={handleChange}
-                required
-                rows="4"
-                placeholder="Enter purpose of meeting"
-                className="w-full border border-slate-300 p-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-slate-800 text-lg"
-              ></textarea>
+            <input
+              type="date"
+              name="visit_date"
+              value={
+                formData.visit_date
+              }
+              onChange={handleChange}
+              required
+              className="w-full border p-4 rounded-xl"
+            />
 
-            </div>
+            {/* TIME */}
 
-            {/* DATE TIME */}
+            <input
+              type="time"
+              name="visit_time"
+              min="09:00"
+              max="18:00"
+              value={
+                formData.visit_time
+              }
+              onChange={handleChange}
+              required
+              className="w-full border p-4 rounded-xl"
+            />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* AVAILABILITY */}
 
-              <div>
+            {availabilityMessage && (
 
-                <label className="block mb-3 font-semibold text-slate-700 text-lg">
-                  Visit Date
-                </label>
-
-                <input
-                  type="date"
-                  name="visit_date"
-                  value={
-                    formData.visit_date
-                  }
-                  onChange={handleChange}
-                  required
-                  className="w-full border border-slate-300 p-4 rounded-2xl text-lg"
-                />
-
+              <div
+                className={`p-4 rounded-xl text-white font-bold ${
+                  availabilityMessage.includes(
+                    "Available"
+                  )
+                    ? "bg-green-500"
+                    : "bg-red-500"
+                }`}
+              >
+                {availabilityMessage}
               </div>
-
-              <div>
-
-                <label className="block mb-3 font-semibold text-slate-700 text-lg">
-                  Visit Time
-                </label>
-
-                <input
-                  type="time"
-                  name="visit_time"
-                  min="09:00"
-                  max="18:00"
-                  value={
-                    formData.visit_time
-                  }
-                  onChange={handleChange}
-                  required
-                  className="w-full border border-slate-300 p-4 rounded-2xl text-lg"
-                />
-
-              </div>
-
-            </div>
-
-            {/* LOCATION */}
-
-            <div>
-
-              <label className="block mb-3 font-semibold text-slate-700 text-lg">
-                Office Location
-              </label>
-
-              <input
-                type="text"
-                value={
-                  formData.location
-                }
-                readOnly
-                className="w-full bg-slate-100 border p-4 rounded-2xl text-lg"
-              />
-
-            </div>
+            )}
 
             {/* BUTTONS */}
 
-            <div className="flex gap-5 pt-5">
-
-              {/* SUBMIT */}
+            <div className="flex gap-5">
 
               <button
                 type="submit"
                 disabled={loading}
-                className="bg-slate-900 hover:bg-slate-700 text-white px-10 py-4 rounded-2xl text-xl font-semibold transition duration-300 shadow-lg"
+                className="bg-slate-900 text-white px-8 py-4 rounded-xl"
               >
 
-                {
-                  loading
-                    ? "Submitting..."
-                    : "Submit Request"
-                }
+                {loading
+                  ? "Submitting..."
+                  : "Submit Request"}
 
               </button>
-
-              {/* BACK */}
 
               <button
                 type="button"
                 onClick={() =>
                   navigate("/")
                 }
-                className="bg-gray-300 hover:bg-gray-400 text-black px-10 py-4 rounded-2xl text-xl font-semibold transition duration-300 shadow-lg"
+                className="bg-gray-300 px-8 py-4 rounded-xl"
               >
                 Back
               </button>
